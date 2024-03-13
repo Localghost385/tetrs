@@ -42,7 +42,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
 
     let playfield_split = Layout::default()
         .direction(Direction::Horizontal)
-        .constraints(vec![Constraint::Length(24), Constraint::Length(6)])
+        .constraints(vec![Constraint::Length(24), Constraint::Length(10)])
         .split(centered);
 
     let side_layout = Layout::default()
@@ -98,7 +98,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
                 );
                 //swap
                 frame.render_widget(
-                    Paragraph::new(format!(""))
+                    Paragraph::new(format!("{}", app.tetromino_string(app.swap_tetromino)))
                         .block(
                             Block::bordered()
                                 .title_alignment(Alignment::Center)

@@ -1,10 +1,10 @@
+use ratatui::backend::CrosstermBackend;
+use ratatui::Terminal;
+use std::io;
 use tetrs::app::{App, AppResult};
 use tetrs::event::{Event, EventHandler};
 use tetrs::handler::handle_key_events;
 use tetrs::tui::Tui;
-use std::io;
-use ratatui::backend::CrosstermBackend;
-use ratatui::Terminal;
 
 #[tokio::main]
 async fn main() -> AppResult<()> {
@@ -14,7 +14,7 @@ async fn main() -> AppResult<()> {
     // Initialize the terminal user interface.
     let backend = CrosstermBackend::new(io::stderr());
     let terminal = Terminal::new(backend)?;
-    let events = EventHandler::new(250);
+    let events = EventHandler::new(69);
     let mut tui = Tui::new(terminal, events);
     tui.init()?;
 

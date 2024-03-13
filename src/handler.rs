@@ -23,20 +23,16 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
             app.current_tetromino = app.spawn_tetromino_random(app.x, app.y);
         }
         KeyCode::Up => {
-            app.land_tetromino();
-            app.clear_falling();
-            app.x = 4;
-            app.y = 0;
-            app.current_tetromino = app.spawn_tetromino_random(app.x, app.y);
+            app.reset_tetromino();
         }
         KeyCode::Char('w') => {
-            app.move_tetromino(0, -1, app.current_tetromino);
+            app.swap_tetromino();
         }
         KeyCode::Char('a') => {
             app.move_tetromino(-1, 0, app.current_tetromino);
         }
         KeyCode::Char('s') => {
-            app.move_tetromino(0, 1, app.current_tetromino);
+            app.tick_count_target = 0;
         }
         KeyCode::Char('d') => {
             app.move_tetromino(1, 0, app.current_tetromino);

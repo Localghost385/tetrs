@@ -12,3 +12,9 @@ pub mod tui;
 
 /// Event handler.
 pub mod handler;
+
+/// Tetromino definitions.
+pub mod tetromino;
+
+/// Tests.
+pub mod tests;
