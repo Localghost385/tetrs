@@ -2,6 +2,7 @@ use crate::app::{App, AppResult};
 use crate::event::EventHandler;
 use crate::ui;
 use crossterm::event::{DisableMouseCapture, EnableMouseCapture};
+use crossterm::style::Color;
 use crossterm::terminal::{self, EnterAlternateScreen, LeaveAlternateScreen};
 use ratatui::backend::Backend;
 use ratatui::Terminal;
@@ -50,8 +51,9 @@ impl<B: Backend> Tui<B> {
     ///
     /// [`Draw`]: ratatui::Terminal::draw
     /// [`rendering`]: crate::ui:render
-    pub fn draw(&mut self, app: &mut App) -> AppResult<()> {
-        self.terminal.draw(|frame| ui::render(app, frame))?;
+    pub fn draw(&mut self, app: &mut App, accent_color: Color) -> AppResult<()> {
+        self.terminal
+            .draw(|frame| ui::render(app, frame, accent_color.into()))?;
         Ok(())
     }
 

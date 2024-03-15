@@ -2,14 +2,14 @@ use ratatui::{
     layout::Alignment,
     prelude::*,
     style::{Color, Style},
-    widgets::{Block, BorderType, Paragraph},
+    widgets::{Block, BorderType, Borders, Paragraph},
     Frame,
 };
 
 use crate::app::App;
 
 /// Renders the user interface widgets.
-pub fn render(app: &mut App, frame: &mut Frame) {
+pub fn render(app: &mut App, frame: &mut Frame, accent_color: Color) {
     //----------[ helpers ]----------//
     fn calculate_centered_rect(r: Rect, x: u16, y: u16, frame: &mut Frame) -> Rect {
         let popup_layout = Layout::default()
@@ -42,13 +42,14 @@ pub fn render(app: &mut App, frame: &mut Frame) {
 
     let playfield_split = Layout::default()
         .direction(Direction::Horizontal)
-        .constraints(vec![Constraint::Length(24), Constraint::Length(10)])
+        .constraints(vec![Constraint::Length(24), Constraint::Length(6)])
         .split(centered);
 
     let side_layout = Layout::default()
         .direction(Direction::Vertical)
         .constraints(vec![Constraint::Percentage(72), Constraint::Percentage(28)])
         .split(playfield_split[1]);
+
     //-------------------------------//
 
     //----------[ render widgets ]----------//
@@ -62,7 +63,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
                         .title_alignment(Alignment::Center)
                         .border_type(BorderType::Plain),
                 )
-                .style(Style::default().fg(Color::Blue).bg(Color::Black))
+                .style(Style::default().fg(accent_color))
                 .centered(),
             main_layout[0],
         );
@@ -73,26 +74,26 @@ pub fn render(app: &mut App, frame: &mut Frame) {
             frame.render_widget(
                 Paragraph::new(format!("{}", app.playfield_string()))
                     .block(
-                        Block::bordered()
-                            .title_alignment(Alignment::Center)
-                            .border_type(BorderType::Plain),
+                        Block::default()
+                            .borders(Borders::ALL)
+                            .border_type(BorderType::Plain)
+                            .border_style(Style::default().fg(accent_color)), // Set border color to Yellow
                     )
-                    .style(Style::default().fg(Color::Blue).bg(Color::Black))
-                    .centered(),
+                    .style(Style::default().fg(Color::White)), // Set content color to white
                 playfield_split[0],
             );
-
             //----------[ Side Bar]----------//
             {
                 //preview
                 frame.render_widget(
                     Paragraph::new(format!(""))
                         .block(
-                            Block::bordered()
-                                .title_alignment(Alignment::Center)
-                                .border_type(BorderType::Plain),
+                            Block::default()
+                                .borders(Borders::ALL)
+                                .border_type(BorderType::Plain)
+                                .border_style(Style::default().fg(accent_color)), // Set border color to Yellow
                         )
-                        .style(Style::default().fg(Color::Blue).bg(Color::Black))
+                        .style(Style::default().fg(Color::White))
                         .centered(),
                     side_layout[0],
                 );
@@ -100,11 +101,12 @@ pub fn render(app: &mut App, frame: &mut Frame) {
                 frame.render_widget(
                     Paragraph::new(format!("{}", app.tetromino_string(app.swap_tetromino)))
                         .block(
-                            Block::bordered()
-                                .title_alignment(Alignment::Center)
-                                .border_type(BorderType::Plain),
+                            Block::default()
+                                .borders(Borders::ALL)
+                                .border_type(BorderType::Plain)
+                                .border_style(Style::default().fg(accent_color)), // Set border color to Yellow
                         )
-                        .style(Style::default().fg(Color::Blue).bg(Color::Black))
+                        .style(Style::default().fg(Color::White))
                         .centered(),
                     side_layout[1],
                 );

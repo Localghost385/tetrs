@@ -1,3 +1,4 @@
+use crossterm::style::Color;
 use ratatui::backend::CrosstermBackend;
 use ratatui::Terminal;
 use std::io;
@@ -21,7 +22,7 @@ async fn main() -> AppResult<()> {
     // Start the main loop.
     while app.running {
         // Render the user interface.
-        tui.draw(&mut app)?;
+        tui.draw(&mut app, Color::Yellow)?;
         // Handle events.
         match tui.events.next().await? {
             Event::Tick => app.tick(),

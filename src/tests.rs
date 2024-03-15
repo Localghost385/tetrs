@@ -1,8 +1,9 @@
 #[cfg(test)]
 mod tests {
-    use crate::{app::App, tetromino::{Tetromino, TETROMINO_SHAPES}};
-
-    
+    use crate::{
+        app::App,
+        tetromino::{Tetromino, TETROMINO_SHAPES},
+    };
 
     #[test]
     fn test_default_app() {

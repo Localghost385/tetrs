@@ -28,7 +28,7 @@ pub struct App {
     /// Is the application running?
     pub running: bool,
     /// counter
-    pub playfield: [[PlayFieldCell; 14]; 24],
+    pub playfield: [[PlayFieldCell; 18]; 24],
 
     pub current_tetromino: Tetromino,
     pub swap_tetromino: Tetromino,
@@ -42,14 +42,16 @@ pub struct App {
     pub tick_count_target: u32,
 
     pub grace_period: bool,
+
+    pub paused: bool,
 }
 
 impl Default for App {
     fn default() -> Self {
         Self {
             running: true,
-            playfield: [[PlayFieldCell::default(); 14]; 24],
-            current_tetromino: TETROMINO_SHAPES[0],
+            playfield: [[PlayFieldCell::default(); 18]; 24],
+            current_tetromino: TETROMINO_SHAPES[rand::thread_rng().gen_range(0..7)],
             swap_tetromino: Tetromino {
                 rotations: [
                     [
@@ -84,6 +86,7 @@ impl Default for App {
             tick_count: 0,
             tick_count_target: 5,
             grace_period: false,
+            paused: false,
         }
     }
 }
@@ -96,6 +99,9 @@ impl App {
 
     /// Handles the tick event of the terminal.
     pub fn tick(&mut self) {
+        if self.paused {
+            return;
+        }
         self.tick_count += 1;
         if self.tick_count > self.tick_count_target {
             if self.is_tetromino_at_bottom() || self.has_landed_cell_below() {
@@ -119,9 +125,12 @@ impl App {
     }
 
     /// Randomly spawns a tetromino at the specified position on the playfield.
-    pub fn spawn_tetromino_random(&mut self, start_x: usize, start_y: usize) -> Tetromino {
-        let index = rand::thread_rng().gen_range(0..TETROMINO_SHAPES.len());
-        let tetromino = TETROMINO_SHAPES[index];
+    pub fn spawn_tetromino(
+        &mut self,
+        start_x: usize,
+        start_y: usize,
+        tetromino: Tetromino,
+    ) -> Tetromino {
         for y in 0..tetromino.rotations[self.current_rotation].len() {
             for x in 0..tetromino.rotations[self.current_rotation][y].len() {
                 if tetromino.rotations[self.current_rotation][y][x] {
@@ -176,8 +185,31 @@ impl App {
             });
     }
 
-    /// check if tetromino is at the bottom.
+    pub fn drop_tetromino(&mut self) {
+        let mut min_drops = 20;
+        for y in 0..4 {
+            for x in 0..4 {
+                if self.current_tetromino.rotations[self.current_rotation][y][x] {
+                    let mut drops = 0;
+                    let mut y_temp = y;
+                    while self.y + y_temp < self.playfield.len()
+                        && self.x + x < self.playfield[y_temp].len()
+                        && !self.playfield[self.y + y_temp][self.x + x].landed
+                    {
+                        y_temp += 1;
+                        drops += 1;
+                    }
+                    if drops < min_drops {
+                        min_drops = drops;
+                    }
+                }
+            }
+        }
+        self.move_tetromino(0, min_drops - 1, self.current_tetromino);
+        self.reset_tetromino();
+    }
 
+    /// check if tetromino is at the bottom.
     pub fn is_tetromino_at_bottom(&self) -> bool {
         for y in 0..4 {
             for x in 0..4 {
@@ -214,7 +246,11 @@ impl App {
         self.clear_falling();
         self.x = 7;
         self.y = 4;
-        self.current_tetromino = self.spawn_tetromino_random(self.x, self.y);
+        self.current_tetromino = self.spawn_tetromino(
+            self.x,
+            self.y,
+            TETROMINO_SHAPES[rand::thread_rng().gen_range(0..TETROMINO_SHAPES.len())],
+        );
     }
 
     /// Swap current and swap tetromino, and spawn new one if current tetromino is all false.
@@ -227,9 +263,12 @@ impl App {
             .iter()
             .any(|row| row.iter().any(|&cell| cell))
         {
-            self.current_tetromino = self.spawn_tetromino_random(self.x, self.y);
+            self.current_tetromino = self.spawn_tetromino(
+                self.x,
+                self.y,
+                TETROMINO_SHAPES[rand::thread_rng().gen_range(0..TETROMINO_SHAPES.len())],
+            );
         }
-
     }
 
     /// Fill the bottom row of playfield and some in next row.
@@ -255,7 +294,7 @@ impl App {
                 result.push_str(if cell.landed {
                     "██"
                 } else if cell.falling {
-                    "██"
+                    "▒▒"
                 } else {
                     "  "
                 });
@@ -268,7 +307,7 @@ impl App {
     pub fn tetromino_string(&self, tetromino: Tetromino) -> String {
         let mut result = String::new();
         for y in 0..4 {
-            for x in 0..4 {
+            for x in 1..3 {
                 result.push_str(if tetromino.rotations[1][y][x] {
                     "██"
                 } else {

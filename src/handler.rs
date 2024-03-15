@@ -1,8 +1,16 @@
-use crate::app::{App, AppResult};
+use crate::{
+    app::{App, AppResult},
+    tetromino::TETROMINO_SHAPES,
+};
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+use rand::Rng;
 
 /// Handles the key events and updates the state of [`App`].
 pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
+    if app.paused && key_event.code != KeyCode::Char('p') {
+        return Ok(()); // Return early if not paused and not 'p' key
+    }
+
     match key_event.code {
         // Exit application on `ESC`
         KeyCode::Esc => {
@@ -14,16 +22,27 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
                 app.quit();
             }
         }
+        // Toggle pause
+        KeyCode::Char('p') => {
+            app.paused = !app.paused;
+        }
         // Counter handlers
         KeyCode::Right => {
             app.fill_playfield();
         }
         KeyCode::Left => {
             app.clear_falling();
-            app.current_tetromino = app.spawn_tetromino_random(app.x, app.y);
+            app.current_tetromino = app.spawn_tetromino(
+                app.x,
+                app.y,
+                TETROMINO_SHAPES[rand::thread_rng().gen_range(0..TETROMINO_SHAPES.len())],
+            );
         }
         KeyCode::Up => {
             app.reset_tetromino();
+        }
+        KeyCode::Char(' ') => {
+            app.drop_tetromino();
         }
         KeyCode::Char('w') => {
             app.swap_tetromino();
