@@ -1,9 +1,6 @@
 use ratatui::{
-    layout::Alignment,
     prelude::*,
-    style::{Color, Style},
     widgets::{Block, BorderType, Borders, Paragraph},
-    Frame,
 };
 
 use crate::app::App;
@@ -72,7 +69,7 @@ pub fn render(app: &mut App, frame: &mut Frame, accent_color: Color) {
         {
             // Render the playfield.
             frame.render_widget(
-                Paragraph::new(format!("{}", app.playfield_string()))
+                Paragraph::new(app.playfield_string().to_string())
                     .block(
                         Block::default()
                             .borders(Borders::ALL)
@@ -86,7 +83,7 @@ pub fn render(app: &mut App, frame: &mut Frame, accent_color: Color) {
             {
                 //preview
                 frame.render_widget(
-                    Paragraph::new(format!(""))
+                    Paragraph::new(String::new())
                         .block(
                             Block::default()
                                 .borders(Borders::ALL)
@@ -99,7 +96,7 @@ pub fn render(app: &mut App, frame: &mut Frame, accent_color: Color) {
                 );
                 //swap
                 frame.render_widget(
-                    Paragraph::new(format!("{}", app.tetromino_string(app.swap_tetromino)))
+                    Paragraph::new(app.tetromino_string(app.swap_tetromino).to_string())
                         .block(
                             Block::default()
                                 .borders(Borders::ALL)

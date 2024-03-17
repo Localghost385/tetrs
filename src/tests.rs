@@ -1,14 +1,11 @@
 #[cfg(test)]
-mod tests {
-    use crate::{
-        app::App,
-        tetromino::{Tetromino, TETROMINO_SHAPES},
-    };
+mod unit_tests {
+    use crate::{app::App, tetromino::TETROMINO_SHAPES};
 
     #[test]
     fn test_default_app() {
         let app = App::default();
-        assert_eq!(app.running, true);
+        assert!(app.running);
         assert_eq!(app.playfield.len(), 24);
         assert_eq!(app.playfield[0].len(), 14);
         // Add more assertions for other fields if needed
@@ -25,7 +22,7 @@ mod tests {
     fn test_quit() {
         let mut app = App::default();
         app.quit();
-        assert_eq!(app.running, false);
+        assert!(!app.running);
     }
 
     #[test]
@@ -60,12 +57,12 @@ mod tests {
 
     #[test]
     fn test_playfield_string() {
-        let mut app = App::default();
+        let app = App::default();
         // Set up playfield with some landed and falling cells
         // For example:
         // app.playfield[4][4].landed = true;
         // app.playfield[5][5].falling = true;
-        let playfield_string = app.playfield_string();
+        let _playfield_string = app.playfield_string();
         // Add assertions to check the generated string
     }
 

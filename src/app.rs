@@ -7,20 +7,12 @@ use crate::tetromino::{Tetromino, TETROMINO_SHAPES};
 /// Application result type.
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
 
+//----------[ Structs ]----------//
 /// Application.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub struct PlayFieldCell {
     pub falling: bool,
     pub landed: bool,
-}
-
-impl Default for PlayFieldCell {
-    fn default() -> Self {
-        Self {
-            landed: false,
-            falling: false,
-        }
-    }
 }
 
 #[derive(Debug)]
@@ -90,8 +82,10 @@ impl Default for App {
         }
     }
 }
+//-------------------------------//
 
 impl App {
+    //----------[ Loop Functions ]----------//
     /// Constructs a new instance of [`App`].
     pub fn new() -> Self {
         Self::default()
@@ -123,7 +117,9 @@ impl App {
     pub fn quit(&mut self) {
         self.running = false;
     }
+    //--------------------------------------//
 
+    //----------[ Tetromino Movement ]----------//
     /// Randomly spawns a tetromino at the specified position on the playfield.
     pub fn spawn_tetromino(
         &mut self,
@@ -141,6 +137,35 @@ impl App {
         tetromino
     }
 
+    /// prepares for next tetromino.
+    pub fn reset_tetromino(&mut self) {
+        self.land_tetromino();
+        self.clear_falling();
+        self.x = 7;
+        self.y = 3;
+        self.current_rotation = 0;
+        self.current_tetromino = self.spawn_tetromino(
+            self.x,
+            self.y,
+            TETROMINO_SHAPES[rand::thread_rng().gen_range(0..TETROMINO_SHAPES.len())],
+        );
+    }
+
+    /// Places the tetromino on the playfield.
+    pub fn land_tetromino(&mut self) {
+        self.current_tetromino.rotations[self.current_rotation]
+            .iter()
+            .enumerate()
+            .for_each(|(y, row)| {
+                row.iter().enumerate().for_each(|(x, &cell)| {
+                    if cell {
+                        self.playfield[self.y + y][self.x + x].landed = true;
+                    }
+                });
+            });
+    }
+
+    /// Moves the tetromino.
     pub fn move_tetromino(&mut self, move_x: i32, move_y: i32, tetromino: Tetromino) {
         self.clear_falling();
         let new_x = (self.x as i32 + move_x) as usize;
@@ -157,34 +182,11 @@ impl App {
                 }
             }
         }
-
         self.x = new_x;
         self.y = new_y;
     }
 
-    pub fn clear_falling(&mut self) {
-        self.playfield.iter_mut().for_each(|row| {
-            row.iter_mut().for_each(|cell| {
-                if cell.falling {
-                    cell.falling = false;
-                }
-            });
-        });
-    }
-
-    pub fn land_tetromino(&mut self) {
-        self.current_tetromino.rotations[self.current_rotation]
-            .iter()
-            .enumerate()
-            .for_each(|(y, row)| {
-                row.iter().enumerate().for_each(|(x, &cell)| {
-                    if cell {
-                        self.playfield[self.y + y][self.x + x].landed = true;
-                    }
-                });
-            });
-    }
-
+    /// Instanly moves the tetromino as far down as possible.
     pub fn drop_tetromino(&mut self) {
         let mut min_drops = 20;
         for y in 0..4 {
@@ -209,55 +211,11 @@ impl App {
         self.reset_tetromino();
     }
 
-    /// check if tetromino is at the bottom.
-    pub fn is_tetromino_at_bottom(&self) -> bool {
-        for y in 0..4 {
-            for x in 0..4 {
-                if self.current_tetromino.rotations[self.current_rotation][y][x] {
-                    if self.y + y + 1 >= self.playfield.len()
-                        || self.playfield[self.y + y + 1][self.x + x].landed
-                    {
-                        return true;
-                    }
-                }
-            }
-        }
-        false
-    }
-
-    /// chack if tetromino has a landed cell below it
-    pub fn has_landed_cell_below(&self) -> bool {
-        for y in 0..4 {
-            for x in 0..4 {
-                if self.current_tetromino.rotations[self.current_rotation][y][x] {
-                    if self.y + y >= self.playfield.len()
-                        || self.playfield[self.y + y][self.x + x].landed
-                    {
-                        return true;
-                    }
-                }
-            }
-        }
-        false
-    }
-
-    pub fn reset_tetromino(&mut self) {
-        self.land_tetromino();
-        self.clear_falling();
-        self.x = 7;
-        self.y = 4;
-        self.current_tetromino = self.spawn_tetromino(
-            self.x,
-            self.y,
-            TETROMINO_SHAPES[rand::thread_rng().gen_range(0..TETROMINO_SHAPES.len())],
-        );
-    }
-
     /// Swap current and swap tetromino, and spawn new one if current tetromino is all false.
     pub fn swap_tetromino(&mut self) {
         std::mem::swap(&mut self.current_tetromino, &mut self.swap_tetromino);
         self.x = 7;
-        self.y = 4;
+        self.y = 3;
         self.current_rotation = 0;
         if !self.current_tetromino.rotations[self.current_rotation]
             .iter()
@@ -270,18 +228,50 @@ impl App {
             );
         }
     }
+    //------------------------------------------//
 
-    /// Fill the bottom row of playfield and some in next row.
-    pub fn fill_playfield(&mut self) {
-        for i in 4..14 {
-            self.playfield[23][i].landed = true;
-            self.playfield[22][i].landed = true;
-        }
-        for i in 4..14 {
-            if rand::random() {
-                self.playfield[21][i].landed = true;
+    //----------[ Boundary checking ]----------//
+    /// check if tetromino is at the bottom.
+    pub fn is_tetromino_at_bottom(&self) -> bool {
+        for y in 0..4 {
+            for x in 0..4 {
+                if self.current_tetromino.rotations[self.current_rotation][y][x]
+                    && (self.y + y + 1 >= self.playfield.len()
+                        || self.playfield[self.y + y + 1][self.x + x].landed)
+                {
+                    return true;
+                }
             }
         }
+        false
+    }
+
+    /// check if tetromino has a landed cell below it
+    pub fn has_landed_cell_below(&self) -> bool {
+        for y in 0..4 {
+            for x in 0..4 {
+                if self.current_tetromino.rotations[self.current_rotation][y][x]
+                    && (self.y + y >= self.playfield.len()
+                        || self.playfield[self.y + y][self.x + x].landed)
+                {
+                    return true;
+                }
+            }
+        }
+        false
+    }
+    //-----------------------------------------//
+
+    //----------[ Rendering ]----------//
+    /// Clears the falling cells from the playfield.
+    pub fn clear_falling(&mut self) {
+        self.playfield.iter_mut().for_each(|row| {
+            row.iter_mut().for_each(|cell| {
+                if cell.falling {
+                    cell.falling = false;
+                }
+            });
+        });
     }
 
     /// Returns the playfield as a string.
@@ -289,8 +279,8 @@ impl App {
         let mut result = String::new();
         for row_index in 4..self.playfield.len() {
             let row = &self.playfield[row_index];
-            for col_index in 4..row.len() {
-                let cell = &row[col_index];
+            for col_index in row.iter().skip(4) {
+                let cell = col_index;
                 result.push_str(if cell.landed {
                     "██"
                 } else if cell.falling {
@@ -304,6 +294,7 @@ impl App {
         result
     }
 
+    /// Returns a tetromino as a string.
     pub fn tetromino_string(&self, tetromino: Tetromino) -> String {
         let mut result = String::new();
         for y in 0..4 {
@@ -318,4 +309,5 @@ impl App {
         }
         result
     }
+    //---------------------------------//
 }

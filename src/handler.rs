@@ -27,9 +27,7 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
             app.paused = !app.paused;
         }
         // Counter handlers
-        KeyCode::Right => {
-            app.fill_playfield();
-        }
+        KeyCode::Right => {}
         KeyCode::Left => {
             app.clear_falling();
             app.current_tetromino = app.spawn_tetromino(

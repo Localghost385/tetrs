@@ -18,3 +18,6 @@ pub mod tetromino;
 
 /// Tests.
 pub mod tests;
+
+/// Command line arguments parser.
+pub mod clap;
