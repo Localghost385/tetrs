@@ -20,7 +20,7 @@ pub struct App {
     /// Is the application running?
     pub running: bool,
     /// counter
-    pub playfield: [[PlayFieldCell; 18]; 24],
+    pub playfield: Vec<Vec<PlayFieldCell>>,
 
     pub current_tetromino: Tetromino,
     pub swap_tetromino: Tetromino,
@@ -42,7 +42,7 @@ impl Default for App {
     fn default() -> Self {
         Self {
             running: true,
-            playfield: [[PlayFieldCell::default(); 18]; 24],
+            playfield: vec![vec![PlayFieldCell::default(); 18]; 24],
             current_tetromino: TETROMINO_SHAPES[rand::thread_rng().gen_range(0..7)],
             swap_tetromino: Tetromino {
                 rotations: [
@@ -96,6 +96,7 @@ impl App {
         if self.paused {
             return;
         }
+        self.check_for_line_clear();
         self.tick_count += 1;
         if self.tick_count > self.tick_count_target {
             if self.is_tetromino_at_bottom() || self.has_landed_cell_below() {
@@ -163,6 +164,26 @@ impl App {
                     }
                 });
             });
+    }
+
+    pub fn check_for_line_clear(&mut self) -> u32 {
+        let mut lines_cleared = 0;
+
+        for y in (0..self.playfield.len()).rev() {
+            let mut remove_row = true;
+            for x in 4..15 {
+                if !self.playfield[y][x].landed {
+                    remove_row = false;
+                    break;
+                }
+            }
+            if remove_row {
+                self.playfield.remove(y);
+                self.playfield.insert(0, vec![PlayFieldCell::default(); 18]);
+                lines_cleared += 1;
+            }
+        }
+        lines_cleared
     }
 
     /// Moves the tetromino.
