@@ -9,9 +9,68 @@ use crossterm::event::{
 	KeyCode,
 	KeyEvent,
 	KeyModifiers,
+	MouseButton,
 	MouseEvent,
+	MouseEventKind,
 };
 use rand::Rng;
+
+/// handles the mouse events
+pub fn handle_mouse_events(mouse_event: MouseEvent, app: &mut App) {
+	if mouse_event.kind == MouseEventKind::Drag(MouseButton::Left) {
+		let mut button_index: u16 = 99;
+		for (index, button) in app.buttons.iter().enumerate() {
+			if mouse_event.column >= button.x
+				&& mouse_event.column < button.x + button.width
+				&& mouse_event.row >= button.y
+				&& mouse_event.row < button.y + button.height
+			{
+				button_index = index as u16;
+				break; // Exit the loop after finding the matching button
+			}
+		}
+		match button_index {
+			0 => {
+				if app.current_rotation > 0 {
+					app.current_rotation -= 1;
+				} else {
+					app.current_rotation = 3;
+				}
+				app.clear_falling();
+				app.move_tetromino(0, 0, app.current_tetromino);
+			}
+			1 => {
+				if !app.has_landed_cells_at_offset(-1, 0) {
+					app.move_tetromino(-1, 0, app.current_tetromino);
+				}
+			}
+			2 => {
+				if app.current_rotation < 3 {
+					app.current_rotation += 1;
+				} else {
+					app.current_rotation = 0;
+				}
+				app.clear_falling();
+				app.move_tetromino(0, 0, app.current_tetromino);
+			}
+			3 => {
+				if !app.has_landed_cells_at_offset(1, 0) {
+					app.move_tetromino(1, 0, app.current_tetromino);
+				}
+			}
+			4 => {
+				app.tick_count_target = 0;
+			}
+			5 => {
+				app.drop_tetromino();
+			}
+			6 => {
+				app.swap_tetromino();
+			}
+			_ => {}
+		}
+	}
+}
 
 /// Handles the key events and updates the state of [`App`].
 pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {

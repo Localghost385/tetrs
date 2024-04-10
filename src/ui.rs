@@ -103,13 +103,26 @@ pub fn render(app: &mut App, frame: &mut Frame, accent_color: Color, border_type
 		.constraints(vec![Constraint::Percentage(50), Constraint::Percentage(50)])
 		.split(button_columns[4]);
 
+	app.buttons = vec![];
+
+	app.buttons.push(button_rows_one[0]);
+	app.buttons.push(button_rows_one[1]);
+
+	app.buttons.push(button_rows_two[0]);
+	app.buttons.push(button_rows_two[1]);
+	
+	app.buttons.push(button_rows_three[0]);
+	app.buttons.push(button_rows_three[1]);
+
+	app.buttons.push(side_layout[1]);
+
 	//-------------------------------//
 
 	//----------[ render widgets ]----------//
 	{
 		// Render the main interface.
 		frame.render_widget(
-			Paragraph::new(control_buttons.to_string())
+			Paragraph::new(app.buttons.len().to_string())
 				.block(
 					Block::bordered()
 						.title("┤ TETRS ├")
@@ -183,7 +196,7 @@ pub fn render(app: &mut App, frame: &mut Frame, accent_color: Color, border_type
 				frame.render_widget(
 					Paragraph::new("")
 						.block(Block::bordered().border_type(border_type))
-						.style(Style::default().fg(accent_color))
+						.style(Style::default().fg(Color::Red))
 						.centered(),
 					button_rows_one[1],
 				);

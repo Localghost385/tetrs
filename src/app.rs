@@ -7,6 +7,7 @@ use rand::{
 	prelude::SliceRandom,
 	Rng,
 };
+use ratatui::layout::Rect;
 
 use crate::tetromino::{
 	Tetromino,
@@ -49,6 +50,8 @@ pub struct App {
 	pub grace_period: bool,
 
 	pub paused: bool,
+
+	pub buttons: Vec<Rect>,
 }
 
 impl Default for App {
@@ -96,6 +99,7 @@ impl Default for App {
 			default_tick_count_target: 0,
 			grace_period: false,
 			paused: false,
+			buttons: vec![],
 		}
 	}
 }

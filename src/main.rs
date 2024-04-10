@@ -15,7 +15,7 @@ use tetrs::{
 		Event,
 		EventHandler,
 	},
-	handler::handle_key_events,
+	handler::{handle_key_events, handle_mouse_events},
 	tui::Tui,
 };
 
@@ -25,11 +25,11 @@ async fn main() -> AppResult<()> {
 
 	//----------[ Command line arguments ]----------//
 	let binding = clap_parse();
-	
+
 	let version: bool = *binding.get_one("version").unwrap();
-	
+
 	let color: i64 = *binding.get_one("color").unwrap();
-	
+
 	let binding = clap_parse();
 
 	// Assuming clap_parse() parses the user input correctly
@@ -40,9 +40,9 @@ async fn main() -> AppResult<()> {
 	let border_type: BorderType = match border_type_str.as_str() {
 		"Plain" => BorderType::Plain,
 		"Rounded" => BorderType::Rounded,
-		_ => unreachable!(), 
+		_ => unreachable!(),
 	};
-	
+
 	let tick_count_target: i64 = *binding.get_one("TickCountTarget").unwrap();
 
 	if version {
@@ -78,7 +78,7 @@ async fn main() -> AppResult<()> {
 			match tui.events.next().await? {
 				Event::Tick => app.tick(),
 				Event::Key(key_event) => handle_key_events(key_event, &mut app)?,
-				Event::Mouse(_) => {}
+				Event::Mouse(mouse_event) => handle_mouse_events(mouse_event, &mut app),
 				Event::Resize(_, _) => {}
 			}
 		}
