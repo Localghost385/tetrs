@@ -196,7 +196,7 @@ pub fn render(app: &mut App, frame: &mut Frame, accent_color: Color, border_type
 				frame.render_widget(
 					Paragraph::new("")
 						.block(Block::bordered().border_type(border_type))
-						.style(Style::default().fg(Color::Red))
+						.style(Style::default().fg(accent_color))
 						.centered(),
 					button_rows_one[1],
 				);

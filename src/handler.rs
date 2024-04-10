@@ -17,7 +17,7 @@ use rand::Rng;
 
 /// handles the mouse events
 pub fn handle_mouse_events(mouse_event: MouseEvent, app: &mut App) {
-	if mouse_event.kind == MouseEventKind::Drag(MouseButton::Left) {
+	if mouse_event.kind == MouseEventKind::Down(MouseButton::Left) {
 		let mut button_index: u16 = 99;
 		for (index, button) in app.buttons.iter().enumerate() {
 			if mouse_event.column >= button.x
