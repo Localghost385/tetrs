@@ -9,6 +9,7 @@ use crossterm::event::{
 	KeyCode,
 	KeyEvent,
 	KeyModifiers,
+	MouseEvent,
 };
 use rand::Rng;
 

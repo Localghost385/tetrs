@@ -1,6 +1,7 @@
 use crossterm::style::Color;
 use ratatui::{
 	backend::CrosstermBackend,
+	widgets::BorderType,
 	Terminal,
 };
 use std::io;
@@ -24,14 +25,30 @@ async fn main() -> AppResult<()> {
 
 	//----------[ Command line arguments ]----------//
 	let binding = clap_parse();
+	
 	let version: bool = *binding.get_one("version").unwrap();
+	
 	let color: i64 = *binding.get_one("color").unwrap();
+	
+	let binding = clap_parse();
+
+	// Assuming clap_parse() parses the user input correctly
+	let border_type_str: String = binding
+		.get_one::<String>("BorderCorners")
+		.unwrap()
+		.to_string();
+	let border_type: BorderType = match border_type_str.as_str() {
+		"Plain" => BorderType::Plain,
+		"Rounded" => BorderType::Rounded,
+		_ => unreachable!(), 
+	};
+	
 	let tick_count_target: i64 = *binding.get_one("TickCountTarget").unwrap();
 
-    if version {
-        println!("tetrs v{}", env!("CARGO_PKG_VERSION"));
-        std::process::exit(0);
-    }
+	if version {
+		println!("tetrs v{}", env!("CARGO_PKG_VERSION"));
+		std::process::exit(0);
+	}
 	app.default_tick_count_target = tick_count_target.try_into().unwrap();
 	app.default_tick_count_target += 2;
 	//----------------------------------------------//
@@ -48,7 +65,11 @@ async fn main() -> AppResult<()> {
 	while app.running {
 		//----------[ Rendering ]----------//
 		{
-			tui.draw(&mut app, Color::AnsiValue(color.try_into().unwrap()))?;
+			tui.draw(
+				&mut app,
+				Color::AnsiValue(color.try_into().unwrap()),
+				border_type,
+			)?;
 		}
 		//---------------------------------//
 

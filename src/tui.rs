@@ -19,8 +19,7 @@ use crossterm::{
 	},
 };
 use ratatui::{
-	backend::Backend,
-	Terminal,
+	backend::Backend, widgets, Terminal
 };
 use std::{
 	io,
@@ -69,9 +68,9 @@ impl<B: Backend> Tui<B> {
 	///
 	/// [`Draw`]: ratatui::Terminal::draw
 	/// [`rendering`]: crate::ui:render
-	pub fn draw(&mut self, app: &mut App, accent_color: Color) -> AppResult<()> {
+	pub fn draw(&mut self, app: &mut App, accent_color: Color, border_type: widgets::BorderType) -> AppResult<()> {
 		self.terminal
-			.draw(|frame| ui::render(app, frame, accent_color.into()))?;
+			.draw(|frame| ui::render(app, frame, accent_color.into(), border_type))?;
 		Ok(())
 	}
 
