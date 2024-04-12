@@ -79,14 +79,11 @@ pub fn handle_mouse_events(mouse_event: MouseEvent, app: &mut App) {
 pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
 	if app.paused && (key_event.code != KeyCode::Char('p')) {
 		// Exit application on `ESC`
-		if key_event.code == KeyCode::Esc {
+		if key_event.code == KeyCode::Esc
+			|| (key_event.code == KeyCode::Char('c') || key_event.code == KeyCode::Char('C'))
+				&& key_event.modifiers == KeyModifiers::CONTROL
+		{
 			app.quit();
-		}
-		// Exit application on `Ctrl-C`
-		else if key_event.code == KeyCode::Char('c') || key_event.code == KeyCode::Char('C') {
-			if key_event.modifiers == KeyModifiers::CONTROL {
-				app.quit();
-			}
 		}
 		return Ok(()); // Return early if not paused and not 'p' key
 	}
@@ -108,7 +105,8 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
 		}
 		// Counter handlers
 		KeyCode::Right => {
-			app.playfield[app.start_y+1 as usize][app.start_x+1 as usize].landed = !app.playfield[app.start_y+1 as usize][app.start_x+1 as usize].landed;
+			app.playfield[app.start_y + 1_usize][app.start_x + 1_usize].landed =
+				!app.playfield[app.start_y + 1_usize][app.start_x + 1_usize].landed;
 		}
 		KeyCode::Left => {
 			app.clear_falling();

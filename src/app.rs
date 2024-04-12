@@ -131,7 +131,7 @@ impl App {
 
 		self.tick_count += 1;
 		if self.tick_count > self.tick_count_target {
-			self.score += self.check_for_line_clear() * 100 * self.level;
+			self.score += self.check_for_line_clear().pow(2) * 100 * self.level;
 			self.check_for_next_level();
 			if self.has_landed_cells_at_offset(0, 1) {
 				if self.grace_period {
@@ -283,8 +283,7 @@ impl App {
 					let check_x = (self.x + x) as i32 + x_offset;
 
 					let out_of_bounds = check_y >= self.playfield.len() as i32
-						|| check_y < 0 || check_x > 13
-						|| check_x < 4;
+						|| check_y < 0 || !(4..=13).contains(&check_x);
 
 					if out_of_bounds || self.playfield[check_y as usize][check_x as usize].landed {
 						return true;
@@ -321,7 +320,7 @@ impl App {
 	}
 
 	pub fn check_for_game_over(&self) -> bool {
-		if self.playfield[self.start_y + 1 as usize][self.start_x + 1 as usize].landed == true {
+		if self.playfield[self.start_y + 1_usize][self.start_x + 1_usize].landed {
 			// path of home directory
 			let mut path = dirs::home_dir().unwrap();
 			path.push(".tetrs_highscore");
@@ -336,7 +335,7 @@ impl App {
 			let highscore = file.parse::<u32>().unwrap_or(0);
 
 			if self.score > highscore {
-				std::fs::write(&path, &self.score.to_string()).expect("Failed to write file");
+				std::fs::write(&path, self.score.to_string()).expect("Failed to write file");
 			}
 			return true;
 		}
@@ -359,7 +358,7 @@ impl App {
 	}
 
 	pub fn check_for_next_level(&mut self) {
-		if self.score > 500 * self.level * self.level {
+		if self.score > 500 * self.level.pow(3){
 			self.level += 1;
 			self.default_tick_count_target -= 1;
 		}

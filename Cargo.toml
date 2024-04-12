@@ -1,6 +1,6 @@
 [package]
 name = "tetrs"
-version = "0.2.3"
+version = "0.2.4"
 authors = ["Grace Murphy <localghost385@gmail.com>"]
 license = "MIT"
 edition = "2021"
