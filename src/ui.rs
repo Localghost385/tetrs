@@ -110,27 +110,39 @@ pub fn render(app: &mut App, frame: &mut Frame, accent_color: Color, border_type
 
 	app.buttons.push(button_rows_two[0]);
 	app.buttons.push(button_rows_two[1]);
-	
+
 	app.buttons.push(button_rows_three[0]);
 	app.buttons.push(button_rows_three[1]);
 
+	app.buttons.push(side_layout[0]);
 	app.buttons.push(side_layout[1]);
 
+	app.check_for_highscore();
 	//-------------------------------//
 
 	//----------[ render widgets ]----------//
 	{
 		// Render the main interface.
 		frame.render_widget(
-			Paragraph::new(app.buttons.len().to_string())
-				.block(
-					Block::bordered()
-						.title("┤ TETRS ├")
-						.title_alignment(Alignment::Center)
-						.border_type(border_type),
-				)
-				.style(Style::default().fg(accent_color))
-				.centered(),
+			Paragraph::new(format!(
+				"Score: {}\nHigh Score:{}\nLevel:{}\n{}",
+				app.score,
+				app.high_score,
+				app.level,
+				if app.paused {
+					"PAUSED"
+				} else {
+					""
+				}
+			))
+			.block(
+				Block::bordered()
+					.title("┤ TETRS ├")
+					.title_alignment(Alignment::Center)
+					.border_type(border_type),
+			)
+			.style(Style::default().fg(accent_color))
+			.centered(),
 			main_layout[0],
 		);
 

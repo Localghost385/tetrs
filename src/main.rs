@@ -15,7 +15,10 @@ use tetrs::{
 		Event,
 		EventHandler,
 	},
-	handler::{handle_key_events, handle_mouse_events},
+	handler::{
+		handle_key_events,
+		handle_mouse_events,
+	},
 	tui::Tui,
 };
 
@@ -43,14 +46,13 @@ async fn main() -> AppResult<()> {
 		_ => unreachable!(),
 	};
 
-	let tick_count_target: i64 = *binding.get_one("TickCountTarget").unwrap();
+	let level: i64 = *binding.get_one("startlevel").unwrap();
 
 	if version {
 		println!("tetrs v{}", env!("CARGO_PKG_VERSION"));
 		std::process::exit(0);
 	}
-	app.default_tick_count_target = tick_count_target.try_into().unwrap();
-	app.default_tick_count_target += 2;
+	app.level = level.try_into().unwrap();
 	//----------------------------------------------//
 
 	//----------[ Init UI ]----------//

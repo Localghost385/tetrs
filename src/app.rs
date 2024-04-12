@@ -52,6 +52,10 @@ pub struct App {
 	pub paused: bool,
 
 	pub buttons: Vec<Rect>,
+
+	pub score: u32,
+	pub high_score: u32,
+	pub level: u32,
 }
 
 impl Default for App {
@@ -96,10 +100,13 @@ impl Default for App {
 			current_rotation: 0,
 			tick_count: 0,
 			tick_count_target: 0,
-			default_tick_count_target: 0,
+			default_tick_count_target: 15,
 			grace_period: false,
 			paused: false,
 			buttons: vec![],
+			score: 0,
+			high_score: 0,
+			level: 1,
 		}
 	}
 }
@@ -124,7 +131,8 @@ impl App {
 
 		self.tick_count += 1;
 		if self.tick_count > self.tick_count_target {
-			self.check_for_line_clear();
+			self.score += self.check_for_line_clear() * 100 * self.level;
+			self.check_for_next_level();
 			if self.has_landed_cells_at_offset(0, 1) {
 				if self.grace_period {
 					self.reset_tetromino();
@@ -156,6 +164,8 @@ impl App {
 		start_y: usize,
 		tetromino: Tetromino,
 	) -> Tetromino {
+		self.check_for_game_over();
+
 		for y in 0..tetromino.rotations[self.current_rotation].len() {
 			for x in 0..tetromino.rotations[self.current_rotation][y].len() {
 				if tetromino.rotations[self.current_rotation][y][x] {
@@ -198,31 +208,6 @@ impl App {
 					}
 				});
 			});
-	}
-
-	pub fn check_for_line_clear(&mut self) -> u32 {
-		let mut lines_cleared = 0;
-		let mut lines_to_be_cleared: Vec<usize> = vec![];
-
-		for y in 0..self.playfield.len() {
-			let mut remove_row = true;
-			for x in 4..14 {
-				if !self.playfield[y][x].landed {
-					remove_row = false;
-					break;
-				}
-			}
-			if remove_row {
-				lines_to_be_cleared.push(y);
-				lines_cleared += 1;
-			}
-		}
-		for row in lines_to_be_cleared {
-			self.playfield.remove(row);
-			self.playfield.insert(0, vec![PlayFieldCell::default(); 18]);
-		}
-
-		lines_cleared
 	}
 
 	/// Moves the tetromino.
@@ -288,7 +273,7 @@ impl App {
 	}
 	//------------------------------------------//
 
-	//----------[ Boundary checking ]----------//
+	//----------[ Checks ]----------//
 	/// Check if there are landed cells at the specified offset from the tetromino's position.
 	pub fn has_landed_cells_at_offset(&self, x_offset: i32, y_offset: i32) -> bool {
 		for y in 0..4 {
@@ -308,6 +293,76 @@ impl App {
 			}
 		}
 		false
+	}
+
+	pub fn check_for_line_clear(&mut self) -> u32 {
+		let mut lines_cleared = 0;
+		let mut lines_to_be_cleared: Vec<usize> = vec![];
+
+		for y in 0..self.playfield.len() {
+			let mut remove_row = true;
+			for x in 4..14 {
+				if !self.playfield[y][x].landed {
+					remove_row = false;
+					break;
+				}
+			}
+			if remove_row {
+				lines_to_be_cleared.push(y);
+				lines_cleared += 1;
+			}
+		}
+		for row in lines_to_be_cleared {
+			self.playfield.remove(row);
+			self.playfield.insert(0, vec![PlayFieldCell::default(); 18]);
+		}
+
+		lines_cleared
+	}
+
+	pub fn check_for_game_over(&self) -> bool {
+		if self.playfield[self.start_y + 1 as usize][self.start_x + 1 as usize].landed == true {
+			// path of home directory
+			let mut path = dirs::home_dir().unwrap();
+			path.push(".tetrs_highscore");
+
+			let file = match std::fs::read_to_string(&path) {
+				Ok(contents) => contents,
+				Err(_) => {
+					std::fs::write(&path, "0").expect("Failed to create file");
+					String::from("0")
+				}
+			};
+			let highscore = file.parse::<u32>().unwrap_or(0);
+
+			if self.score > highscore {
+				std::fs::write(&path, &self.score.to_string()).expect("Failed to write file");
+			}
+			return true;
+		}
+		false
+	}
+	pub fn check_for_highscore(&mut self) {
+		// path of home directory
+		let mut path = dirs::home_dir().unwrap();
+		path.push(".tetrs_highscore");
+
+		let file = match std::fs::read_to_string(&path) {
+			Ok(contents) => contents,
+			Err(_) => {
+				std::fs::write(&path, "0").expect("Failed to create file");
+				String::from("0")
+			}
+		};
+		let high_score = file.parse::<u32>().unwrap_or(0);
+		self.high_score = high_score;
+	}
+
+	pub fn check_for_next_level(&mut self) {
+		if self.score > 500 * self.level * self.level {
+			self.level += 1;
+			self.default_tick_count_target -= 1;
+		}
 	}
 	//-----------------------------------------//
 

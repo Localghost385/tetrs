@@ -65,6 +65,9 @@ pub fn handle_mouse_events(mouse_event: MouseEvent, app: &mut App) {
 				app.drop_tetromino();
 			}
 			6 => {
+				app.paused = !app.paused;
+			}
+			7 => {
 				app.swap_tetromino();
 			}
 			_ => {}
@@ -104,7 +107,9 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
 			app.paused = !app.paused;
 		}
 		// Counter handlers
-		KeyCode::Right => {}
+		KeyCode::Right => {
+			app.playfield[app.start_y+1 as usize][app.start_x+1 as usize].landed = !app.playfield[app.start_y+1 as usize][app.start_x+1 as usize].landed;
+		}
 		KeyCode::Left => {
 			app.clear_falling();
 			app.current_tetromino = app.spawn_tetromino(
